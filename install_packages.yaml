@@ -1,0 +1,21 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+  - name: Update repository index
+    yum:
+      #name: Update yum cache - yum update
+      update_cache: true
+  - name: Install httpd 
+    yum:
+      name: httpd
+      state: installed
+  - name: Start/stop httpd
+    ansible.builtin.command: 
+      cmd: systemctl start httpd
+    #ansible.builtin.command: systemctl stop httpd
+  - name: Install PHP
+    yum:
+      name: php
+      state: installed
