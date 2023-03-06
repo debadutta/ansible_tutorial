@@ -1,0 +1,38 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: Gather facts
+    gather_facts:
+
+  - name: Update repository index
+    yum:
+      #name: Update yum cache - yum update
+      update_cache: true
+    when: ansible_distribution in ["CentOS","Ubuntu","Debian"]
+
+  - name: Install httpd 
+    yum:
+      name: httpd
+      state: installed
+    when: ansible_distribution == "CentOS" 
+    
+  - name: Start/stop httpd
+    ansible.builtin.command: 
+      cmd: systemctl start httpd
+    when: ansible_distribution_version == "7.8" or ansible_distribution == "CentOS" 
+    #ansible.builtin.command: systemctl stop httpd
+
+  - name: Set https port
+    ansible.builtin.command:
+      cmd: firewall-cmd --add-port=80/tcp
+    when: ansible_distribution == "CentOS" 
+
+  - name: Install PHP
+    yum:
+      name: php
+      state: installed
+    when: ansible_distribution_version == "7.5" and ansible_distribution == "CentOS"
+
