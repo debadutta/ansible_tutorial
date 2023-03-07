@@ -1,2 +1,2 @@
-192.168.1.59
-192.168.1.63
+192.168.1.59 my_webserver=httpd my_php=php
+192.168.1.63 my_webserver=httpd my_php=php
