@@ -1,0 +1,7 @@
+[OCI_INSTANCES]
+130.61.74.112 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/oci_ubuntu
+130.61.137.212 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/oci_ubuntu
+
+[LOCAL_INSTANCES]
+192.168.1.59 ansible_user=osboxes ansible_ssh_pass=osboxes.org
+192.168.1.63 ansible_user=osboxes ansible_ssh_pass=osboxes.org
