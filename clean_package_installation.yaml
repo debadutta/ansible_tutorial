@@ -1,0 +1,23 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+        
+    - name: "Install apache and php package in Ubuntu"
+      apt:
+        name: 
+          - {{ apache_package }}
+          - {{ php_package }}
+        state: latest
+        update_cache: yes
+      when: ansible_distribution in ["Debian","Ubuntu"] and ansible_distribution_version == "18.04"
+        
+    - name: "Install httpd and php package in CentOS"
+      yum:
+        name: 
+          - httpd
+          - php
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == "CentOS"

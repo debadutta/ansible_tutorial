@@ -1,0 +1,7 @@
+[OCI_INSTANCES]
+130.61.74.112 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/oci_ubuntu apache_package=apache2 php_package=libapache2-mod-php
+130.61.137.212 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/oci_ubuntu apache_package=apache2 php_package=libapache2-mod-php
+
+[LOCAL_INSTANCES]
+192.168.1.59 ansible_user=osboxes apache_package=httpd php_package=php
+192.168.1.63 ansible_user=osboxes apache_package=httpd php_package=php
