@@ -7,3 +7,9 @@
 
 [file_servers]
 192.168.1.63 ansible_user=osboxes 
+
+[workstations]
+130.61.74.112 ansible_user=ubuntu
+192.168.1.59 ansible_user=osboxes
+130.61.137.212 ansible_user=ubuntu
+192.168.1.63 ansible_user=osboxes 

@@ -1,0 +1,99 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+    - name: Install updates - CentOS
+      yum:
+        update_cache: yes
+        update_only: yes
+      when: ansible_distribution == "CentOS"
+      tags: always
+
+    - name: Install updates - Ubuntu 
+      apt:
+        upgrade: dist
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+      tags: always
+
+- name: This play tries to install apache and php packages
+  hosts: web_servers
+  become: true
+  tasks:   
+
+    - name: "Install apache and php package in Ubuntu servers"
+      tags: "apache-php,ubuntu,webserver"
+      apt:
+        name: 
+          - apache2
+          - libapache2-mod-php
+        state: latest
+      when: ansible_distribution in ["Debian","Ubuntu"] and ansible_distribution_version == "18.04"
+        
+    - name: "Install httpd and php package in CentOS servers"
+      tags: "apache-php,centos,webserver"
+      yum:
+        name: 
+          - httpd
+          - php
+        state: latest
+      when: ansible_distribution == "CentOS" 
+
+    - name: This play copies the default HTML file
+      tags: "apache-php,webserver"
+      copy: 
+        src: ./files/default_site.html
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: 0644
+
+- name: Installs unzip and then installs terraform on workstations
+  hosts: workstations
+  tags: workstation
+  become: true
+  tasks:
+
+  - name: Install unzip on the workstations
+    package:
+      name: unzip
+
+  - name: Download and install terraform
+    unarchive:
+      src: https://releases.hashicorp.com/terraform/1.4.2/terraform_1.4.2_linux_amd64.zip
+      dest: /usr/local/bin
+      remote_src: true
+      owner: root
+      group: root
+      mode: 0755
+
+        
+
+- hosts: db_servers
+  become: yes
+  tasks:
+
+    - name: Install mariaDB (Ubuntu)
+      apt:
+        name: mariadb-server
+        state: latest
+      when:  ansible_distribution == "Ubuntu"
+
+    - name: Install mariaDB (CentOS)
+      yum: 
+        name: mariadb
+        state: latest
+      when: ansible_distribution == "CentOS"
+
+- hosts: file_servers
+  become: yes
+  tasks:
+    - name: install samba file server on Ubuntu or CentOS
+      package: 
+        name: samba
+        state: latest
+
+
+    
