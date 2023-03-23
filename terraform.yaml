@@ -9,17 +9,17 @@
         update_cache: yes
         update_only: yes
       when: ansible_distribution == "CentOS"
-      tags: always
+      tags: centos
 
     - name: Install updates - Ubuntu 
       apt:
         upgrade: dist
         update_cache: yes
       when: ansible_distribution == "Ubuntu"
-      tags: always
+      tags: ubuntu
 
 - name: This play tries to install apache and php packages
-  hosts: web_servers
+  hosts: all
   become: true
   tasks:   
 
@@ -41,6 +41,29 @@
         state: latest
       when: ansible_distribution == "CentOS" 
 
+    - name: "Starts the httpd service in centos hosts"
+      tags: "httpd,centos,webserver"
+      service:
+        name: httpd
+        state: started
+        enabled: true
+      when: ansible_distribution == "CentOS"
+
+    - name: "Opens port 80 in cent OS webserver"
+      tags: "centos,webserver"
+      command:
+        cmd: firewall-cmd --add-port=80/tcp
+      when: ansible_distribution == "CentOS" 
+
+    - name: "Play to update the httpd config file"
+      tags: "httpd,centos,webserver"
+      lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: '^ServerAdmin'
+        line: ServerAdmin someone@somewhere.com
+      when: ansible_distribution == "CentOS"
+      register: httpd_config_state
+
     - name: This play copies the default HTML file
       tags: "apache-php,webserver"
       copy: 
@@ -49,6 +72,14 @@
         owner: root
         group: root
         mode: 0644
+
+    - name: "Starts the httpd service in centos hosts"
+      tags: "httpd,centos,webserver"
+      service:
+        name: httpd
+        state: restarted
+        enabled: true
+      when: httpd_config_state is changed
 
 - name: Installs unzip and then installs terraform on workstations
   hosts: workstations
@@ -68,8 +99,6 @@
       owner: root
       group: root
       mode: 0755
-
-        
 
 - hosts: db_servers
   become: yes
