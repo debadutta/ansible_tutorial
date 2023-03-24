@@ -1,0 +1,153 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+    - name: Install updates - CentOS
+      yum:
+        update_cache: yes
+        update_only: yes
+      when: ansible_distribution == "CentOS"
+      tags: centos
+
+    - name: Install updates - Ubuntu 
+      apt:
+        upgrade: dist
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+      tags: ubuntu
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: Create simone user
+    tags: ssh
+    user:
+      name: simone2
+      group: root      
+
+  - name: Add ssh key for simone
+    tags: ssh
+    authorized_key:
+      user: simone2
+      key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCQ72s3hjyBMfhwjcY8ZX2p/w215PwymQo8215nraybhWOIE3FuuznynWzrZjLCujSRcz3K5wfJnoKqPxPmVI27guloRkZ0z0xtYCEqgHZ6pE0tOdglLH8KhQfibqcF9MsaV07O7bp9aL/P9ZG9ax3XKdjM4yr2FB0EXY9ogKbuM8A/VxJqpn7KUP+qvFh1DbNg1eKYZGnt8HMYSHY3CpugaOckwrb77eCKfPfYcaFsEAHbn3ubnGrX998J5fF20SLxhQ0XufJxecN4b6kuAOe/yTSa8/0waF30yjXR0QkTAgh9PhWrWBuXV0LtSVXVlMF4A0OTeKgDzA15VdLnoWTz ssh-key-2023-03-08"
+
+  - name: Add sudoers file for simone
+    tags: ssh
+    copy:
+      src: sudoers-simone
+      dest: /etc/sudoers.d/simone2
+      owner: root
+      group: root   
+      mode: 0440 
+
+- name: This play tries to install apache and php packages
+  hosts: all
+  become: true
+  tasks:   
+
+    - name: "Install apache and php package in Ubuntu servers"
+      tags: "apache-php,ubuntu,webserver"
+      apt:
+        name: 
+          - apache2
+          - libapache2-mod-php
+        state: latest
+      when: ansible_distribution in ["Debian","Ubuntu"] and ansible_distribution_version == "18.04"
+        
+    - name: "Install httpd and php package in CentOS servers"
+      tags: "apache-php,centos,webserver"
+      yum:
+        name: 
+          - httpd
+          - php
+        state: latest
+      when: ansible_distribution == "CentOS" 
+
+    - name: "Starts the httpd service in centos hosts"
+      tags: "httpd,centos,webserver"
+      service:
+        name: httpd
+        state: started
+        enabled: true
+      when: ansible_distribution == "CentOS"
+
+    - name: "Opens port 80 in cent OS webserver"
+      tags: "centos,webserver"
+      command:
+        cmd: firewall-cmd --add-port=80/tcp
+      when: ansible_distribution == "CentOS" 
+
+    - name: "Play to update the httpd config file"
+      tags: "httpd,centos,webserver"
+      lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: '^ServerAdmin'
+        line: ServerAdmin someone@somewhere.com
+      when: ansible_distribution == "CentOS"
+      register: httpd_config_state
+
+    - name: This play copies the default HTML file
+      tags: "apache-php,webserver"
+      copy: 
+        src: ./files/default_site.html
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: "Starts the httpd service in centos hosts"
+      tags: "httpd,centos,webserver"
+      service:
+        name: httpd
+        state: restarted
+        enabled: true
+      when: httpd_config_state is changed
+
+- name: Installs unzip and then installs terraform on workstations
+  hosts: workstations
+  tags: workstation
+  become: true
+  tasks:
+
+  - name: Install unzip on the workstations
+    package:
+      name: unzip
+
+  - name: Download and install terraform
+    unarchive:
+      src: https://releases.hashicorp.com/terraform/1.4.2/terraform_1.4.2_linux_amd64.zip
+      dest: /usr/local/bin
+      remote_src: true
+      owner: root
+      group: root
+      mode: 0755
+
+- hosts: db_servers
+  become: yes
+  tasks:
+
+    - name: Install mariaDB (Ubuntu)
+      apt:
+        name: mariadb-server
+        state: latest
+      when:  ansible_distribution == "Ubuntu"
+
+    - name: Install mariaDB (CentOS)
+      yum: 
+        name: mariadb
+        state: latest
+      when: ansible_distribution == "CentOS"
+
+- hosts: file_servers
+  become: yes
+  tasks:
+    - name: install samba file server on Ubuntu or CentOS
+      package: 
+        name: samba
+        state: latest
+
+
+    

@@ -4,28 +4,18 @@
   become: true
   tasks:
 
-    - name: "Update repository index in Ubuntu"
-      apt:
-        update_cache: yes
-      when: ansible_distribution in ["Debian","Ubuntu"]
-        
-    - name: "Install apache package in Ubuntu"
-      apt:
-        name: 
-          - apache2
-          - libapache2-mod-php
-        state: present
-      when: ansible_distribution in ["Debian","Ubuntu"] and ansible_distribution_version == "18.04"
+  - name: ping hosts - [test1]
+    ping:
+    tags: test1
 
-    - name: "Update repository index in CentOS"
-      yum:
-        update_cache: yes
-      when: ansible_distribution == "CentOS"
-        
-    - name: "Install httpd and php package in CentOS"
-      yum:
-        name: 
-          - httpd
-          - php
-        state: present
-      when: ansible_distribution == "CentOS"
+  - name: ping hosts - [test2]
+    ping:
+    tags: test2
+
+  - name: ping hosts - [always]
+    ping:
+    tags: always
+
+  - name: ping hosts - [no tags]
+    ping:
+ 

@@ -1,15 +1,15 @@
 [web_servers]
-130.61.74.112 ansible_user=ubuntu
-192.168.1.59 ansible_user=osboxes
+130.61.74.112
+192.168.1.59 
 
 [db_servers]
-130.61.137.212 ansible_user=ubuntu
+130.61.137.212
 
 [file_servers]
-192.168.1.63 ansible_user=osboxes 
+192.168.1.63  
 
 [workstations]
-130.61.74.112 ansible_user=ubuntu
-192.168.1.59 ansible_user=osboxes
-130.61.137.212 ansible_user=ubuntu
-192.168.1.63 ansible_user=osboxes 
+130.61.74.112
+192.168.1.59 
+130.61.137.212
+192.168.1.63  
