@@ -1,0 +1,6 @@
+- name: restart_apache
+  tags: "httpd,centos,webserver"
+  service:
+    name: "{{ apache_service_name }}"
+    state: restarted
+    enabled: true
