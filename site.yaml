@@ -2,64 +2,50 @@
 
 - hosts: all
   become: true
-  tasks:
+  pre_tasks:
 
-    - name: Install updates - CentOS
+    - name: Update repo cache - CentOS
+      tags: always,centos
       yum:
         update_cache: yes
-        update_only: yes
+      changed_when: false
       when: ansible_distribution == "CentOS"
 
-    - name: Install updates - Ubuntu 
+    - name: Update repo cache - Ubuntu 
+      tags: always,ubuntu
       apt:
-        upgrade: dist
         update_cache: yes
+      changed_when: false
       when: ansible_distribution == "Ubuntu"
-
-- name: This play tries to install apache and php packages
-  hosts: web_servers
-  become: true
-  tasks:   
-
-    - name: "Install apache and php package in Ubuntu servers"
-      apt:
-        name: 
-          - apache2
-          - libapache2-mod-php
-        state: latest
-      when: ansible_distribution in ["Debian","Ubuntu"] and ansible_distribution_version == "18.04"
-        
-    - name: "Install httpd and php package in CentOS servers"
-      yum:
-        name: 
-          - httpd
-          - php
-        state: latest
-      when: ansible_distribution == "CentOS" 
-
-- hosts: db_servers
-  become: yes
-  tasks:
-
-    - name: Install mariaDB (Ubuntu)
-      apt:
-        name: mariadb-server
-        state: latest
-      when:  ansible_distribution == "Ubuntu"
-
-    - name: Install mariaDB (CentOS)
-      yum: 
-        name: mariadb
-        state: latest
-      when: ansible_distribution == "CentOS"
-
-- hosts: file_servers
-  become: yes
-  tasks:
-    - name: install samba file server on Ubuntu or CentOS
-      package: 
-        name: samba
-        state: latest
-
-
     
+- hosts: all
+  become: true
+  roles:
+    - base
+
+- name: This play sets up the webservers by installing packages, starting service and opening port
+  hosts: web_servers
+  tags: web_servers
+  become: true
+  roles:
+    - web_servers
+
+- name: Installs unzip and then installs terraform on workstations
+  hosts: workstations
+  tags: workstations
+  become: true
+  roles:
+    - workstations
+ 
+- hosts: db_servers
+  tags: db_servers
+  become: yes
+  roles:
+    - db_servers
+ 
+- hosts: file_servers
+  tags: file_servrs
+  become: yes
+  roles:
+    - file_servers
+  

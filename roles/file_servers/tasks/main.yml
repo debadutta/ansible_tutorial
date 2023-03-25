@@ -1,0 +1,4 @@
+- name: install samba file server on Ubuntu or CentOS
+  package: 
+    name: samba
+    state: latest
