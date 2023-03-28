@@ -1,3 +1,5 @@
 apache_package_name: httpd
 apache_service_name: httpd
 php_package_name: php
+ssh_users: "simone osboxes"
+template_ssh_file: sshd_config_centos.j2
